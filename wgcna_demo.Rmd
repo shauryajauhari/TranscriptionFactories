@@ -1,0 +1,73 @@
+---
+title: "WGCNA Demo"
+author: 'Shaurya Jauhari (Email: shauryajauhari@gzhmu.edu.cn)'
+date: '`r paste(Sys.Date())`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Installing the package and setting up the options.
+
+```{r package installation}
+
+install.packages("BiocManager", repos='http://cran.us.r-project.org')
+BiocManager::install("WGCNA")
+
+install.packages("ggdendro")
+## Setting options
+options(stringsAsFactors = FALSE)
+library(WGCNA)
+library(ggdendro)
+library(ggplot2)
+
+```
+
+Importing data files from female and male liver tissues from mice, and exploring
+them.
+
+```{r data import}
+
+mydataf <- read.csv("./FemaleLiver-Data/LiverFemale3600.csv", header = TRUE) 
+colnames(mydataf)
+
+head(mydataf)
+
+mydatam <- read.csv("./LiverMale3600.csv")
+head(mydatam)
+
+## LocusLinkID and ProteomeID are annotations from the said databases
+## http://www.ncbi.nlm.nih.gov/LocusLink/
+
+```
+
+Moving on, we extract expression data from the master dataframe. Recall that the rows represent genes and the columns represent different samples (mice) in the original data.
+```{r data cleaning}
+
+exprdata = as.data.frame(t(mydataf[, -c(1:8)]))
+names(exprdata) = mydataf$substanceBXH
+rownames(exprdata) = names(mydataf)[-c(1:8)]
+```
+
+```{r missing values and outliers}
+
+gsg = goodSamplesGenes(exprdata, verbose = 3)
+gsg$allOK
+
+```
+```{r clustering samples}
+
+sample_tree <- as.dendrogram(hclust(dist(exprdata), method = "average"))
+
+dplot <- ggdendrogram(data= sample_tree, rotate = FALSE)+
+  theme_dendro()+
+  ggtitle("Sample clustering to detect outliers")+
+  xlab("Samples")
+
+print(dplot)
+```
+
