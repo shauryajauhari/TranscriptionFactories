@@ -59,6 +59,9 @@ gsg = goodSamplesGenes(exprdata, verbose = 3)
 gsg$allOK
 
 ```
+
+
+
 ```{r clustering samples}
 
 sample_tree <- as.dendrogram(hclust(dist(exprdata), method = "average"))
