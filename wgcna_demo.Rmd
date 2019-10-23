@@ -18,9 +18,11 @@ Installing the package and setting up the options.
 install.packages("BiocManager", repos='http://cran.us.r-project.org')
 BiocManager::install("WGCNA")
 
-install.packages("ggdendro")
+install.packages("ggdendro", repos='http://cran.us.r-project.org')
 ## Setting options
 options(stringsAsFactors = FALSE)
+# enableWGCNAThreads() ## Enabling multi-threads in processing.
+
 library(WGCNA)
 library(ggdendro)
 library(ggplot2)
@@ -45,12 +47,14 @@ head(mydatam)
 
 ```
 
-Moving on, we extract expression data from the master dataframe. Recall that the rows represent genes and the columns represent different samples (mice) in the original data.
+Moving on, we extract expression data from the master dataframe. Recall that the rows represent genes and the columns represent different samples (mice) in the original data. WGCNA requires that genes be given in columns.
+
 ```{r data cleaning}
 
 exprdata = as.data.frame(t(mydataf[, -c(1:8)]))
 names(exprdata) = mydataf$substanceBXH
 rownames(exprdata) = names(mydataf)[-c(1:8)]
+
 ```
 
 ```{r missing values and outliers}
@@ -66,6 +70,7 @@ sample_tree <- as.dendrogram(hclust(dist(exprdata), method = "average"))
 dplot <- ggdendrogram(data= sample_tree, rotate = FALSE)+
   theme_dendro()+
   ggtitle("Sample clustering to detect outliers")+
+  theme(plot.title = element_text(hjust = 0.5))+
   xlab("Samples")
 
 print(dplot)
