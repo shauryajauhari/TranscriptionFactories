@@ -20,7 +20,7 @@ install.packages("BiocManager",
                  dependencies = TRUE)
 BiocManager::install("WGCNA")
 
-install.packages("ggdendro", 
+install.packages(c("ggdendro", "ggthemes"),
                  repos='http://cran.us.r-project.org',
                  dependencies = TRUE)
 
@@ -34,6 +34,7 @@ library(WGCNA)
 library(ggdendro)
 library(ggplot2)
 library(cowplot)
+library(ggthemes)
 
 ```
 
@@ -112,11 +113,9 @@ p1 <- ggplot(data = as.data.frame(sft_thresh),
 
      labs( x="Soft Threshold (power)",
      y="Scale Free Topology Model Fit, signed R^2", title = "Scale Independence", tag = "A")+
-  theme_classic()
+  theme_classic()+
+  geom_vline(xintercept = 8, color="red") # Red line corresponds to using an R^2 cut-off
 
-# Red line corresponds to using an R^2 cut-off
-
-#abline(h=0.80,col="red")
 
 # Mean connectivity as a function of the soft-thresholding power
 
@@ -146,7 +145,8 @@ dplot <- ggdendrogram(data= sample_tree, rotate = FALSE)+
   theme_dendro()+
   ggtitle("Sample clustering to detect outliers")+
   theme(plot.title = element_text(hjust = 0.5))+
-  xlab("Samples")
+  xlab("Samples")+
+  geom_label()
 
 print(dplot)
 ```
