@@ -15,13 +15,20 @@ Installing the package and setting up the options.
 
 ```{r package installation}
 
-install.packages("BiocManager", repos='http://cran.us.r-project.org')
+install.packages("BiocManager", 
+                 repos='http://cran.us.r-project.org',
+                 dependencies = TRUE)
 BiocManager::install("WGCNA")
 
-install.packages("ggdendro", repos='http://cran.us.r-project.org')
+install.packages("ggdendro", 
+                 repos='http://cran.us.r-project.org',
+                 dependencies = TRUE)
+
 ## Setting options
+
 options(stringsAsFactors = FALSE)
-# enableWGCNAThreads() ## Enabling multi-threads in processing.
+
+#enableWGCNAThreads() ## Enabling multi-threads in processing.
 
 library(WGCNA)
 library(ggdendro)
@@ -55,12 +62,26 @@ exprdata = as.data.frame(t(mydataf[, -c(1:8)]))
 names(exprdata) = mydataf$substanceBXH
 rownames(exprdata) = names(mydataf)[-c(1:8)]
 
+
+## Let us consider a subset of data for this demonstration. We'll use first 500 features.
+
+exprdata <- exprdata[,1:500]
+
 ```
 
 ```{r missing values and outliers}
 
 gsg = goodSamplesGenes(exprdata, verbose = 3)
 gsg$allOK
+
+```
+
+A scale free network topology is the one where all nodes's degree distribution is in abidance to power law ,i.e. **P(k) ~ k^9- gamma)**. If any nodes have to be added to this connected network, the degrees are accordingly adjusted. 
+
+```{r Soft_Thresholding}
+
+trial_powers <- c(c(1:10), seq(from=12, to=20, by=2))
+
 
 ```
 
