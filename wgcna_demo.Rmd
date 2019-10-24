@@ -20,7 +20,7 @@ install.packages("BiocManager",
                  dependencies = TRUE)
 BiocManager::install("WGCNA")
 
-install.packages(c("ggdendro", "ggthemes"),
+install.packages("ggdendro",
                  repos='http://cran.us.r-project.org',
                  dependencies = TRUE)
 
@@ -34,7 +34,6 @@ library(WGCNA)
 library(ggdendro)
 library(ggplot2)
 library(cowplot)
-library(ggthemes)
 
 ```
 
@@ -47,9 +46,6 @@ mydataf <- read.csv("./FemaleLiver-Data/LiverFemale3600.csv", header = TRUE)
 colnames(mydataf)
 
 head(mydataf)
-
-mydatam <- read.csv("./LiverMale3600.csv")
-head(mydatam)
 
 ## LocusLinkID and ProteomeID are annotations from the said databases
 ## http://www.ncbi.nlm.nih.gov/LocusLink/
@@ -136,8 +132,44 @@ plot_grid(p1,p2,ncol=2)
 
 ```
 
+## Topological Overlap Measure
+
+The next steps is to caliberate the **Topological Overlap Measure (TOM)**. It is premised over the notion of shared relationships between two clusters. 
+
+```{r TOM}
+
+## Now we generate adjacency values and TOM similarity matrices on the basis of selected softpower.
+
+softPower = 7;
+
+#calclute the adjacency matrix
+adj= adjacency(exprdata,
+               type = "unsigned", 
+               power = softPower);
+
+#turn adjacency matrix into topological overlap to minimize the effects of noise and spurious associations
+TOM = TOMsimilarityFromExpr(exprdata,
+                            networkType = "unsigned", 
+                            TOMType = "unsigned", 
+                            power = softPower);
+
+colnames(TOM) = rownames(TOM) = names(exprdata) # same rows as columns, therefore adjacency.
+dissTOM=1-TOM # "distance = 1 - similarity"
+
+```
+## Module Detection
 
 ```{r clustering samples}
+
+#hierarchical clustering of the genes based on the TOM dissimilarity measure
+geneTree = flashClust(as.dist(dissTOM),
+                      method="average")
+
+#plot the resulting clustering tree (dendrogram)
+plot(geneTree, 
+     xlab="", 
+     sub="",
+     cex=0.3)
 
 sample_tree <- as.dendrogram(hclust(dist(exprdata), method = "average"))
 
