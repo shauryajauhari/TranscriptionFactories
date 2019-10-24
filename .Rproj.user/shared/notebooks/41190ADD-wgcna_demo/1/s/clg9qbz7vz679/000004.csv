@@ -1,0 +1,21 @@
+"0",""
+"0","#hierarchical clustering of the genes based on the TOM dissimilarity measure"
+"0",""
+"0","library(flashClust)"
+"2","
+Attaching package: ‘flashClust’
+
+"
+"2","The following object is masked from ‘package:stats’:
+
+    hclust
+
+"
+"0","geneTree = flashClust(as.dist(dissTOM),"
+"0","                      method=""average"")"
+"0",""
+"0","#plot the resulting clustering tree (dendrogram)"
+"0","plot(geneTree, "
+"0","     xlab="""", "
+"0","     sub="""","
+"0","     cex=0.3)"

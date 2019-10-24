@@ -1,0 +1,7 @@
+"0","cat(""The best estimate for use is"",sft_thresh$powerEstimate,""."")"
+"1","The best estimate for use is"
+"1"," "
+"1","6"
+"1"," "
+"1","."
+"0","print(sft_thresh$fitIndices)"

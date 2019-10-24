@@ -1,0 +1,12 @@
+"0",""
+"0","sample_tree <- as.dendrogram(hclust(dist(exprdata), method = ""average""))"
+"0",""
+"0","dplot <- ggdendrogram(data= sample_tree, rotate = FALSE)+"
+"0","  theme_dendro()+"
+"0","  ggtitle(""Sample clustering to detect outliers"")+"
+"0","  theme(plot.title = element_text(hjust = 0.5))+"
+"0","  xlab(""Samples"")+"
+"0","  geom_label()"
+"2","Error in ggdendrogram(data = sample_tree, rotate = FALSE) : 
+  could not find function ""ggdendrogram""
+"

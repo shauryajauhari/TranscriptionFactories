@@ -1,0 +1,96 @@
+"1","
+"
+"2","installing the source package ‘BiocManager’
+
+"
+"2","trying URL 'http://cran.us.r-project.org/src/contrib/BiocManager_1.30.9.tar.gz'
+"
+"2","Content type 'application/x-gzip'"
+"2"," length 39983 bytes (39 KB)
+"
+"2","downloaded 39 KB
+
+"
+"1","* installing *source* package 'BiocManager' ...
+"
+"1","** package 'BiocManager' successfully unpacked and MD5 sums checked
+"
+"1","** using staged installation
+"
+"1","** R
+"
+"1","** inst
+"
+"1","** byte-compile and prepare package for lazy loading
+"
+"1","** help
+"
+"1","*** installing help indices
+"
+"1","  converting help for package 'BiocManager'
+"
+"1","    finding HTML links ... done
+"
+"1","    BiocManager-pkg                         html  
+"
+"1","    available                               html  
+"
+"1","    install                                 html  
+"
+"1","    repositories                            html  
+"
+"1","    valid                                   html  
+"
+"1","    version                                 html  
+"
+"1","** building package indices
+"
+"1","** installing vignettes
+"
+"1","** testing if installed package can be loaded from temporary location
+"
+"1","*** arch - i386
+"
+"1","*** arch - x64
+"
+"1","** testing if installed package can be loaded from final location
+"
+"1","*** arch - i386
+"
+"1","*** arch - x64
+"
+"1","** testing if installed package keeps a record of temporary installation path
+"
+"1","* DONE (BiocManager)
+"
+"2","
+"
+"2",""
+"2","The downloaded source packages are in
+	â€˜C:\Users\rajni\AppData\Local\Temp\RtmpeG1Jcf\downloaded_packagesâ€™"
+"2",""
+"2","
+"
+"0","BiocManager::install(""WGCNA"")"
+"2","Bioconductor version 3.9 (BiocManager 1.30.9), R 3.6.0 (2019-04-26)
+"
+"2","Installing package(s) 'WGCNA'
+"
+"2","also installing the dependency ‘Rcpp’
+
+"
+"2","cannot open URL 'https://bioconductor.org/packages/3.9/data/experiment/bin/windows/contrib/3.6/PACKAGES.rds': HTTP status was '404 Not Found'"
+"2","cannot open URL 'https://bioconductor.org/packages/3.9/workflows/bin/windows/contrib/3.6/PACKAGES.rds': HTTP status was '404 Not Found'"
+"2","trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.6/Rcpp_1.0.2.zip'
+"
+"2","Content type 'application/zip'"
+"2"," length 4535856 bytes (4.3 MB)
+"
+"2","downloaded 4.3 MB
+
+"
+"2","trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.6/WGCNA_1.68.zip'
+"
+"2","Content type 'application/zip'"
+"2"," length 3479323 bytes (3.3 MB)
+"

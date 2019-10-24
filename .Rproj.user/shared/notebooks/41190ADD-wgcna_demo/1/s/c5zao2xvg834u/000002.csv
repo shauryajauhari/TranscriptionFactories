@@ -1,0 +1,5 @@
+"0",""
+"0","gsg = goodSamplesGenes(exprdata, verbose = 3)"
+"2","Error in goodSamplesGenes(exprdata, verbose = 3) : 
+  could not find function ""goodSamplesGenes""
+"

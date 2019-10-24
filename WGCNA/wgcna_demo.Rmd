@@ -1,0 +1,210 @@
+---
+title: "WGCNA Demo"
+author: 'Shaurya Jauhari (Email: shauryajauhari@gzhmu.edu.cn)'
+date: '`r paste(Sys.Date())`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Installing the package and setting up the options.
+
+```{r package installation}
+
+install.packages("BiocManager", 
+                 repos='http://cran.us.r-project.org',
+                 dependencies = TRUE)
+BiocManager::install("WGCNA")
+
+install.packages("ggdendro",
+                 repos='http://cran.us.r-project.org',
+                 dependencies = TRUE)
+
+## Setting options
+
+options(stringsAsFactors = FALSE)
+
+#enableWGCNAThreads() ## Enabling multi-threads in processing.
+
+library(WGCNA)
+library(ggdendro)
+library(ggplot2)
+library(cowplot)
+
+```
+
+Importing data files from female and male liver tissues from mice, and exploring
+them.
+
+```{r data import}
+
+mydataf <- read.csv("../FemaleLiver-Data/LiverFemale3600.csv", header = TRUE) 
+colnames(mydataf)
+
+head(mydataf)
+
+## LocusLinkID and ProteomeID are annotations from the said databases
+## http://www.ncbi.nlm.nih.gov/LocusLink/
+
+```
+
+Moving on, we extract expression data from the master dataframe. Recall that the rows represent genes and the columns represent different samples (mice) in the original data. WGCNA requires that genes be given in columns.
+
+```{r data cleaning}
+
+exprdata = as.data.frame(t(mydataf[, -c(1:8)]))
+names(exprdata) = mydataf$substanceBXH
+rownames(exprdata) = names(mydataf)[-c(1:8)]
+
+
+## Let us consider a subset of data for this demonstration. We'll use first 500 features.
+
+exprdata <- exprdata[,1:500]
+```
+
+```{r missing values and outliers}
+
+gsg = goodSamplesGenes(exprdata, verbose = 3)
+gsg$allOK
+
+```
+## Scale Free Topology
+
+A scale free network topology is the one where all nodes's degree distribution is in abidance to power law ,i.e. **P(k) ~ k^- beta)**. If any nodes have to be added to this connected network, the degrees are accordingly adjusted. 
+
+```{r Soft_Thresholding}
+
+trial_powers <- c(c(1:10), seq(from=12, to=20, by=2))
+sft_thresh <- pickSoftThreshold (exprdata,
+                                dataIsExpr = TRUE,
+                                powerVector = trial_powers,
+                                corFnc = cor,
+                                corOptions = list(use = 'p'),
+                                networkType = "unsigned")
+cat("The best estimate for use is",sft_thresh$powerEstimate,".")
+print(sft_thresh$fitIndices)
+
+```
+
+It has been determined that *beta=6 is the best exponent for unsigned networks, and beta=12 is the optimal one for signed networks*.
+
+Typically, the degrees per node will "steadily" decrease with the increase in the number of nodes of the network cluster. This is another way of understanding the notion of scale-free topology.  
+
+
+```{r Plotting the estimated powers against slopes}
+
+# Scale-free topology fit index as a function of the soft-thresholding power
+
+p1 <- ggplot(data = as.data.frame(sft_thresh),
+       aes (x = sft_thresh$fitIndices[,1],
+     y = (-sign(sft_thresh$fitIndices[,3]) * sft_thresh$fitIndices[,2]),
+     label = trial_powers)) + 
+  geom_label()+
+  
+  # the sign expression returns the vector of signs of estimated slopes, multiplied by the correlation coefficient.
+
+     labs( x="Soft Threshold (power)",
+     y="Scale Free Topology Model Fit, signed R^2", title = "Scale Independence", tag = "A")+
+  theme_classic()+
+  geom_vline(xintercept = 8, color="red") # Red line corresponds to using an R^2 cut-off
+
+
+# Mean connectivity as a function of the soft-thresholding power
+
+p2 <- ggplot(data = as.data.frame(sft_thresh),
+       aes (x = sft_thresh$fitIndices[,1],
+     y = sft_thresh$fitIndices[,5],
+     label = trial_powers)) + 
+  geom_label()+
+  
+  # the sign expression returns the vector of signs of estimated slopes, multiplied by the correlation coefficient.
+
+     labs( x="Soft Threshold (power)",
+     y="Mean Connectivity", title = "Mean Connectivity", tag = "B")+
+  theme_classic()
+
+
+plot_grid(p1,p2,ncol=2)
+
+```
+
+## Topological Overlap Measure
+
+The next steps is to caliberate the **Topological Overlap Measure (TOM)**. It is premised over the notion of shared relationships between two clusters. 
+
+```{r TOM}
+
+## Now we generate adjacency values and TOM similarity matrices on the basis of selected softpower.
+
+softPower = 7;
+
+#calclute the adjacency matrix
+adj= adjacency(exprdata,
+               type = "unsigned", 
+               power = softPower);
+
+#turn adjacency matrix into topological overlap to minimize the effects of noise and spurious associations
+TOM = TOMsimilarityFromExpr(exprdata,
+                            networkType = "unsigned", 
+                            TOMType = "unsigned", 
+                            power = softPower);
+
+colnames(TOM) = rownames(TOM) = names(exprdata) # same rows as columns, therefore adjacency.
+dissTOM=1-TOM # "distance/ dissimilarity = 1 - similarity"
+
+```
+
+## Module Detection
+
+```{r clustering samples}
+
+#hierarchical clustering of the genes based on the TOM dissimilarity measure
+
+library(flashClust)
+gene_tree = flashClust(as.dist(dissTOM),
+                      method="average")
+
+#plot the resulting clustering tree (dendrogram)
+plot(gene_tree, 
+     xlab="", 
+     sub="",
+     cex=0.3)
+
+sample_tree <- as.dendrogram(hclust(dist(exprdata), method = "average"))
+
+dplot <- ggdendrogram(data= sample_tree, rotate = FALSE)+
+  theme_dendro()+
+  ggtitle("Sample clustering to detect outliers")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  xlab("Samples")+
+  geom_label()
+
+print(dplot)
+```
+```{r Tuning parameters for modules}
+# Set the minimum module size
+min_mod_size = 20
+
+# Module identification using dynamic tree cut
+
+dynamic_mods = cutreeDynamic(dendro = gene_tree,  
+                             method="tree", 
+                             minClusterSize = min_mod_size)
+
+dynamic_mods1 = cutreeDynamic(dendro = gene_tree, 
+                              distM = dissTOM, 
+                              method="hybrid", 
+                              deepSplit = 2, 
+                              pamRespectsDendro = FALSE, 
+                              minClusterSize = min_mod_size)
+
+#the following command gives the module labels and the size of each module. Lable 0 is reserved for unassigned genes
+table(dynamic_mods)
+table(dynamic_mods1)
+
+```
+

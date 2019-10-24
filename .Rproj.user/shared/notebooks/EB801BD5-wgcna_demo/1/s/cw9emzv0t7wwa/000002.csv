@@ -1,0 +1,32 @@
+"0",""
+"0","## Now we generate adjacency values and TOM similarity matrices on the basis of selected softpower."
+"0",""
+"0","softPower = 7;"
+"0",""
+"0","#calclute the adjacency matrix"
+"0","adj= adjacency(exprdata,"
+"0","               type = ""unsigned"", "
+"0","               power = softPower);"
+"0",""
+"0","#turn adjacency matrix into topological overlap to minimize the effects of noise and spurious associations"
+"0","TOM = TOMsimilarityFromExpr(exprdata,"
+"0","                            networkType = ""unsigned"", "
+"0","                            TOMType = ""unsigned"", "
+"0","                            power = softPower);"
+"1","TOM calculation: adjacency..
+"
+"1","..will not use multithreading.
+"
+"1"," Fraction of slow calculations: 0.437876
+"
+"1","..connectivity..
+"
+"1","..matrix multiplication (system BLAS)..
+"
+"1","..normalization..
+"
+"1","..done.
+"
+"0","colnames(TOM) = rownames(TOM) = names(exprdata) # same rows as columns, therefore adjacency."
+"0","dissTOM=1-TOM # ""distance/ dissimilarity = 1 - similarity"""
+"0",""

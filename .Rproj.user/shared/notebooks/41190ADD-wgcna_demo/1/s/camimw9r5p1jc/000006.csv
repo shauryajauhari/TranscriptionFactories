@@ -1,0 +1,41 @@
+"0",""
+"0","install.packages(""BiocManager"", "
+"0","                 repos='http://cran.us.r-project.org',"
+"0","                 dependencies = TRUE)"
+"2","WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+"
+"2","Installing package into ‘C:/Users/rajni/Documents/R/win-library/3.6’
+(as ‘lib’ is unspecified)
+"
+"1","Warning in "
+"1",""
+"1","install.packages"
+"1",""
+"1"," :
+  "
+"1",""
+"1","lzma decoding result 10"
+"1",""
+"1","
+"
+"1","Warning in "
+"1",""
+"1","install.packages"
+"1",""
+"1"," :
+  "
+"1",""
+"1","dependency â€˜BiocStyleâ€™ is not available"
+"1",""
+"1","
+"
+"1","
+"
+"1",""
+"1","  There is a binary version available but the source version
+  is later"
+"1",""
+"1",":
+"
