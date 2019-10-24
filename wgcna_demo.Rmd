@@ -66,7 +66,6 @@ rownames(exprdata) = names(mydataf)[-c(1:8)]
 ## Let us consider a subset of data for this demonstration. We'll use first 500 features.
 
 exprdata <- exprdata[,1:500]
-
 ```
 
 ```{r missing values and outliers}
@@ -75,16 +74,70 @@ gsg = goodSamplesGenes(exprdata, verbose = 3)
 gsg$allOK
 
 ```
+## Scale Free Topology
 
-A scale free network topology is the one where all nodes's degree distribution is in abidance to power law ,i.e. **P(k) ~ k^9- gamma)**. If any nodes have to be added to this connected network, the degrees are accordingly adjusted. 
+A scale free network topology is the one where all nodes's degree distribution is in abidance to power law ,i.e. **P(k) ~ k^- beta)**. If any nodes have to be added to this connected network, the degrees are accordingly adjusted. 
 
 ```{r Soft_Thresholding}
 
 trial_powers <- c(c(1:10), seq(from=12, to=20, by=2))
-
+sft_thresh <- pickSoftThreshold (exprdata,
+                                dataIsExpr = TRUE,
+                                powerVector = trial_powers,
+                                corFnc = cor,
+                                corOptions = list(use = 'p'),
+                                networkType = "unsigned")
+cat("The best estimate for use is",sft_thresh$powerEstimate,".")
+print(sft_thresh$fitIndices)
 
 ```
 
+It has been determined that *beta=6 is the best exponent for unsigned networks, and beta=12 is the optimal one for signed networks*.
+
+Typically, the degrees per node will "steadily" decrease with the increase in the number of nodes of the network cluster. This is another way of understanding the notion of scale-free topology.  
+
+
+```{r Plotting the estimated powers against slopes}
+
+# Plot the results
+sizeGrWindow(9, 5)
+par(mfrow = c(1,2))
+cex1 = 0.9
+
+# Scale-free topology fit index as a function of the soft-thresholding power
+
+plot(sft_thresh$fitIndices[,1],
+     -sign(sft_thresh$fitIndices[,3]) * sft_thresh$fitIndices[,2], # the sign expression returns the vector of signs of estimated slopes, multiplied by the correlation coefficient.
+     xlab="Soft Threshold (power)",
+     ylab="Scale Free Topology Model Fit, signed R^2",
+     type="n", 
+     main = paste("Scale independence"))
+
+text(sft_thresh$fitIndices[,1],
+     -sign(sft_thresh$fitIndices[,3]) * sft_thresh$fitIndices[,2],
+     labels=trial_powers,
+     cex=cex1,
+     col="red");
+
+# Red line corresponds to using an R^2 cut-off
+
+abline(h=0.80,col="red")
+
+# Mean connectivity as a function of the soft-thresholding power
+plot(sft_thresh$fitIndices[,1], 
+     sft_thresh$fitIndices[,5],
+     xlab="Soft Threshold (power)",
+     ylab="Mean Connectivity", 
+     type="n",
+     main = paste("Mean connectivity"))
+
+text(sft_thresh$fitIndices[,1], 
+     sft_thresh$fitIndices[,5], 
+     labels=trial_powers, 
+     cex=cex1,
+     col="red")
+
+```
 
 
 ```{r clustering samples}
