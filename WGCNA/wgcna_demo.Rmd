@@ -57,7 +57,7 @@ Moving on, we extract expression data from the master dataframe. Recall that the
 ```{r data cleaning}
 
 exprdata = as.data.frame(t(mydataf[, -c(1:8)]))
-names(exprdata) = mydataf$substanceBXH
+names(exprdata) = mydataf$gene_symbol
 rownames(exprdata) = names(mydataf)[-c(1:8)]
 
 
@@ -85,7 +85,7 @@ sft_thresh <- pickSoftThreshold (exprdata,
                                 corFnc = cor,
                                 corOptions = list(use = 'p'),
                                 networkType = "unsigned")
-cat("The best estimate for use is",sft_thresh$powerEstimate,".")
+cat("The best estimate for use is", sft_thresh$powerEstimate, ".")
 print(sft_thresh$fitIndices)
 
 ```
@@ -186,10 +186,12 @@ dplot <- ggdendrogram(data= sample_tree, rotate = FALSE)+
 print(dplot)
 ```
 ```{r Tuning parameters for modules}
-# Set the minimum module size
+
+## Set the minimum module size
+
 min_mod_size = 20
 
-# Module identification using dynamic tree cut
+## Module identification using dynamic tree cut
 
 dynamic_mods = cutreeDynamic(dendro = gene_tree,  
                              method="tree", 
@@ -202,9 +204,117 @@ dynamic_mods1 = cutreeDynamic(dendro = gene_tree,
                               pamRespectsDendro = FALSE, 
                               minClusterSize = min_mod_size)
 
-#the following command gives the module labels and the size of each module. Lable 0 is reserved for unassigned genes
+
+## we could highlight module labels and the size(number of nodes) of each module. Label 0 is reserved for unassigned genes that are in essence independent nodes.
+
 table(dynamic_mods)
 table(dynamic_mods1)
 
+```
+
+It is always better to have a enhanced, color-coded visualization of modules for precise interpretation.
+
+```{r Modules in colors}
+
+## we can conveniently assign colors to these labels. "Grey" is assigned to label 0.
+
+dynamic_mod_colors = labels2colors(dynamic_mods)
+table(dynamic_mod_colors)
+
+
+dynamic_mod_colors1 = labels2colors(dynamic_mods1)
+table(dynamic_mod_colors1)
+
+  
+```
+
+We can also choose to discard the independent nodes (since they do not belong to any network) and just map the coeherent modules.
+
+```{r Modules only}
+
+## discard the unassigned genes, and focus on the rest
+
+rest_genes= (dynamic_mod_colors != "grey")
+dissTOM1 = 1 - TOMsimilarityFromExpr(exprdata[,rest_genes], 
+                                  power = softPower)
+
+## Let's plot the tree now.
+
+colnames(dissTOM1) = rownames(dissTOM1) = names(exprdata[rest_genes])
+hier_tree = flashClust(as.dist(dissTOM1), method="average" )
+plotDendroAndColors(hier_tree, 
+                    dynamic_mod_colors[rest_genes], 
+                    "Dynamic Tree Cut", 
+                    dendroLabels = FALSE, 
+                    hang = 0.03, 
+                    addGuide = TRUE, 
+                    guideHang = 0.05, 
+                    main = "Gene dendrogram and module colors")
+
+
+```
+
+
+```{r}
+
+## set the diagonal of the dissimilarity to NA 
+
+diag(dissTOM1) = NA;
+
+## Visualize the TOM plot. Raise the dissimilarity matrix to the power of 4 to bring out the module structure
+
+sizeGrWindow(7,7)
+TOMplot(dissTOM1, hier_tree, as.character(dynamic_mod_colors[rest_genes]))
+
+```
+
+Let us extract the modules now.
+
+```{r Module Extraction}
+
+module_colors= setdiff(unique(dynamic_mod_colors), "grey")
+for (color in module_colors){
+    module = names(exprdata)[which(dynamic_mod_colors == color)]
+    write.table(module, 
+                paste0("module_",color, ".txt"), 
+                sep="\t", 
+                row.names=FALSE, 
+                col.names=FALSE,
+                quote=FALSE)
+}
+
+```
+
+Look at expression patterns of these genes, as they're clustered.
+
+```{r}
+
+module.order <- unlist(tapply(1:ncol(exprdata),
+                              as.factor(dynamic_mod_colors),
+                              I))
+m <- t(t(exprdata[,module.order])/apply(exprdata[,module.order],2,max))
+
+heatmap (t(m),
+         zlim = c(0,1),
+         col = gray.colors(100),
+         Rowv = NA,
+         Colv = NA,
+         labRow = NA,
+         scale = "none",
+         RowSideColors = dynamic_mod_colors[module.order])
+
+```
+
+We can now look at the module gene listings and try to interpret their functions .. for instance using http://amigo.geneontology.org/rte
+
+Quantify module similarity by eigengene correlation. Eigengenes: Module representatives.
+
+```{r}
+
+MEList <-  moduleEigengenes(exprdata, colors = dynamic_mod_colors)
+MEs <- MEList$eigengenes
+plotEigengeneNetworks(MEs, "", 
+                      marDendro = c(0,4,1,2), 
+                      marHeatmap = c(3,4,1,2))
 ```
 
