@@ -28,8 +28,6 @@ install.packages("ggdendro",
 
 options(stringsAsFactors = FALSE)
 
-#enableWGCNAThreads() ## Enabling multi-threads in processing.
-
 library(WGCNA)
 library(ggdendro)
 library(ggplot2)
@@ -268,7 +266,7 @@ TOMplot(dissTOM1, hier_tree, as.character(dynamic_mod_colors[rest_genes]))
 
 ```
 
-Let us extract the modules now.
+Let us extract the modules now. The modules could also be envisioned as communities or colonies of like entities.
 
 ```{r Module Extraction}
 
@@ -285,7 +283,7 @@ for (color in module_colors){
 
 ```
 
-Look at expression patterns of these genes, as they're clustered.
+Let us now visualize the expression patterns of these genes, as they're clustered. There ought to be distinct pattern cues inside and outside of a cluster.
 
 ```{r}
 
@@ -305,9 +303,9 @@ heatmap (t(m),
 
 ```
 
-We can now look at the module gene listings and try to interpret their functions .. for instance using http://amigo.geneontology.org/rte
+We can now look at the module gene listings and try to interpret their functions .. for instance using [] (http://amigo.geneontology.org/rte)
 
-Quantify module similarity by eigengene correlation. Eigengenes: Module representatives.
+Quantify module similarity by eigengene correlation. Eigengenes: Module representatives, putatively (by definition) the rank 1 vectors that span the module expression.
 
 ```{r}
 
